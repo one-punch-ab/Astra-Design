@@ -1,0 +1,743 @@
+/* AG Grid Astra DSM 2.0 Theme Override */
+
+/* CSS Variables for Astra theme */
+.ag-theme-astra {
+  --ag-background-color: #FFFFFF;
+  --ag-foreground-color: #52525B; /* rgb(82, 82, 91) - zinc-600 */
+  --ag-border-color: #E5E7EB;
+  --ag-secondary-foreground-color: #6B7280;
+  --ag-header-background-color: var(--astra-gray-50);
+  --ag-header-foreground-color: #71717A;
+  --ag-odd-row-background-color: #FFFFFF;
+  --ag-row-hover-color: #eff6ff;
+  --ag-selected-row-background-color: #EFF6FF;
+  --ag-range-selection-border-color: #173DA6;
+  --ag-range-selection-background-color: rgba(23, 61, 166, 0.1);
+  --ag-input-focus-border-color: #173DA6;
+  --ag-input-focus-box-shadow: 0 0 0 2px rgba(23, 61, 166, 0.2);
+  --ag-checkbox-checked-color: #173DA6;
+  --ag-checkbox-unchecked-color: #D4D4D8;
+  --ag-checkbox-indeterminate-color: #173DA6;
+  --ag-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --ag-font-size: 13px;
+  --ag-row-border-color: #E5E7EB;
+  --ag-cell-horizontal-padding: 4px;
+  --ag-grid-size: 4px;
+  --ag-row-height: 36px;
+  --ag-header-height: 32px;
+  --ag-list-item-height: 32px;
+}
+
+/* Base grid styling */
+.ag-theme-astra {
+  font-family: var(--ag-font-family);
+  font-size: var(--ag-font-size);
+  line-height: 1.5;
+}
+
+/* Header styling */
+.ag-theme-astra .ag-header {
+  background-color: var(--ag-header-background-color);
+  border-bottom: 1px solid var(--astra-gray-200);
+}
+
+.ag-theme-astra .ag-header-cell {
+  font-weight: 600;
+  font-size: 12px;
+  color: #71717A;
+  padding: 8px !important;
+  text-transform: uppercase;
+  border-right: 1px solid #e4e4e7;
+  background-color: var(--ag-header-background-color);
+}
+
+/* Header cell background variants based on column type */
+.ag-theme-astra .ag-header-cell.header-gray {
+  background-color: #fafafa;
+}
+
+.ag-theme-astra .ag-header-cell.header-gray-dark {
+  background-color: #f4f4f5;
+}
+
+.ag-theme-astra .ag-header-cell.header-blue {
+  background-color: #eff6ff;
+}
+
+.ag-theme-astra .ag-header-cell-label {
+  gap: 6px;
+  width: 100%;
+  height: 100%;
+}
+
+/* Custom header component wrapper */
+.ag-theme-astra .ag-header-cell-comp-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+/* Add column header cell */
+.ag-theme-astra .ag-header-cell.add-column-header {
+  padding: 0 !important;
+}
+
+.ag-theme-astra .ag-header-cell.add-column-header .ag-header-cell-comp-wrapper {
+  justify-content: center;
+}
+
+/* Hide cells in the add column (only show header) */
+.ag-theme-astra .add-column-cell {
+  display: none !important;
+}
+
+/* Hide the pinned right section for rows (only keep header) */
+.ag-theme-astra .ag-pinned-right-cols-container {
+  display: none !important;
+}
+
+/* Hide header cell label for select column (checkbox only) */
+.ag-theme-astra .ag-header-cell[col-id="select"] .ag-header-cell-label {
+  width: 0;
+  height: 0;
+  gap: 0;
+  justify-content: center;
+}
+
+.ag-theme-astra .ag-header-cell.header-gray:hover {
+  background-color: #f0f0f0;
+}
+
+.ag-theme-astra .ag-header-cell.header-gray-dark:hover {
+  background-color: #e8e8e9;
+}
+
+.ag-theme-astra .ag-header-cell.header-blue:hover {
+  background-color: #dbeafe;
+}
+
+/* Header cell text alignment */
+.ag-theme-astra .ag-header-cell-text {
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 16px;
+  text-transform: uppercase;
+}
+
+/* Header resize handle */
+.ag-theme-astra .ag-header-cell-resize {
+  width: 8px;
+}
+
+.ag-theme-astra .ag-header-cell-resize::after {
+  background-color: var(--ag-border-color);
+  width: 1px;
+  height: 50%;
+}
+
+/* Sort indicators */
+.ag-theme-astra .ag-sort-indicator-icon {
+  color: #9CA3AF;
+}
+
+.ag-theme-astra .ag-sort-ascending-icon,
+.ag-theme-astra .ag-sort-descending-icon {
+  color: var(--astra-primary);
+}
+
+/* Row styling */
+.ag-theme-astra .ag-row {
+  border-bottom: 1px solid var(--ag-row-border-color);
+  transition: background-color 150ms ease;
+}
+
+.ag-theme-astra .ag-row:hover {
+  background-color: var(--ag-row-hover-color);
+}
+
+/* Row hover state - light purple from Figma design */
+.ag-theme-astra .ag-row:hover .ag-cell {
+  background-color: transparent;
+}
+
+.ag-theme-astra .ag-row-selected {
+  background-color: var(--ag-selected-row-background-color) !important;
+}
+
+.ag-theme-astra .ag-row-selected:hover {
+  background-color: #DBEAFE !important;
+}
+
+/* Cell styling - aligned top-left with 4px padding */
+.ag-theme-astra .ag-cell:not(.checkbox-cell):not(.actions-cell) {
+  padding: 4px !important;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  line-height: 1.4;
+}
+
+.ag-theme-astra .ag-cell-value {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.ag-theme-astra .ag-cell-wrap-text {
+  white-space: normal;
+  word-wrap: break-word;
+  align-items: flex-start;
+}
+
+/* Editable cell styling */
+.ag-theme-astra .editable-cell {
+  cursor: text;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.ag-theme-astra .editable-cell:hover {
+  background-color: #F9FAFB;
+}
+
+/* Remove focus styling on cells */
+.ag-theme-astra .ag-cell-focus:not(.ag-cell-range-selected) {
+  border: none !important;
+  background-color: transparent !important;
+}
+
+/* No border on cell when popup editor is open */
+.ag-theme-astra .ag-cell-popup-editing {
+  border: none !important;
+  background-color: transparent !important;
+}
+
+/* Cell editing mode */
+.ag-theme-astra .ag-cell-inline-editing {
+  padding: 0;
+  height: auto;
+}
+
+.ag-theme-astra .ag-cell-inline-editing .ag-cell-edit-wrapper {
+  padding: 8px 12px;
+}
+
+/* Large text area popup editor - custom styling handled by TextCellEditor */
+.ag-theme-astra .ag-popup-editor {
+  z-index: 9999 !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none !important;
+  overflow: visible;
+  width: auto !important;
+  max-width: none !important;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); }
+  to { transform: scale(1); }
+}
+
+/* No focus ring on popup editor */
+.ag-theme-astra .ag-popup-editor:focus-within {
+  outline: none;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.ag-theme-astra .ag-large-text-input {
+  padding: 0;
+  background-color: #FFFFFF;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ag-theme-astra .ag-large-textarea,
+.ag-theme-astra .ag-large-text-input textarea {
+  padding: 8px 8px 6px 8px; /* px-8 py-6 from Figma */
+  font-family: var(--ag-font-family);
+  font-size: 14px; /* text-14px from Figma */
+  line-height: 20px; /* leading-20px from Figma */
+  color: #52525B; /* gray-600 */
+  border: none;
+  border-radius: 4px;
+  resize: vertical;
+  min-height: 96px; /* h-96px from Figma */
+  width: 100%;
+  box-sizing: border-box;
+  background-color: #FFFFFF;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.ag-theme-astra .ag-large-textarea::placeholder,
+.ag-theme-astra .ag-large-text-input textarea::placeholder {
+  color: #a1a1aa; /* gray-400 from Figma */
+}
+
+.ag-theme-astra .ag-large-textarea:focus,
+.ag-theme-astra .ag-large-text-input textarea:focus {
+  outline: none;
+  border: none;
+  box-shadow: none;
+}
+
+/* Popup editor wrapper */
+.ag-theme-astra .ag-popup-child {
+  z-index: 9999 !important;
+}
+
+/* Checkbox styling - Astra DSM style */
+.ag-theme-astra .ag-checkbox-input-wrapper {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px; /* Changed from 3px to 4px to match Astra DSM */
+  border: 1.5px solid #D4D4D8; /* gray-300 */
+  background-color: white;
+  transition: all 150ms ease;
+}
+
+.ag-theme-astra .ag-checkbox-input-wrapper:hover {
+  border-color: #A1A1AA; /* gray-400 */
+}
+
+.ag-theme-astra .ag-checkbox-input-wrapper.ag-checked {
+  background-color: #173DA6; /* Astra primary blue */
+  border-color: #173DA6;
+}
+
+.ag-theme-astra .ag-checkbox-input-wrapper.ag-indeterminate {
+  background-color: #173DA6;
+  border-color: #173DA6;
+}
+
+.ag-theme-astra .ag-checkbox-input-wrapper::after {
+  color: white;
+}
+
+/* Checkbox checkmark icon */
+.ag-theme-astra .ag-checkbox-input-wrapper.ag-checked::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* Checkbox cell (first column) - centered checkbox */
+.ag-theme-astra .checkbox-cell {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+}
+
+.ag-theme-astra .checkbox-cell .ag-cell-wrapper,
+.ag-theme-astra .checkbox-cell .ag-selection-checkbox,
+.ag-theme-astra .checkbox-cell .ag-checkbox,
+.ag-theme-astra .checkbox-cell .ag-input-wrapper,
+.ag-theme-astra .checkbox-cell .ag-checkbox-input-wrapper {
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.ag-theme-astra .checkbox-cell .ag-checkbox-input-wrapper {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+/* Header checkbox centering */
+.ag-theme-astra .checkbox-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+}
+
+.ag-theme-astra .checkbox-header .ag-header-cell-comp-wrapper,
+.ag-theme-astra .checkbox-header .ag-header-select-all,
+.ag-theme-astra .checkbox-header .ag-checkbox,
+.ag-theme-astra .checkbox-header .ag-input-wrapper,
+.ag-theme-astra .checkbox-header .ag-checkbox-input-wrapper {
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.ag-theme-astra .checkbox-header .ag-checkbox-input-wrapper {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+/* Question cell hover effect */
+.ag-theme-astra .question-cell {
+  padding-left: 12px !important;
+}
+
+.ag-theme-astra .question-cell-content span {
+  transition: transform 200ms ease;
+}
+
+/* Actions cell - for other columns */
+.ag-theme-astra .actions-cell {
+  padding: 0 !important;
+}
+
+.ag-theme-astra .actions-cell .ag-cell-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+/* Actions column - show play button on row hover */
+.ag-theme-astra .actions-cell .play-button {
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+
+.ag-theme-astra .ag-row:hover .actions-cell .play-button {
+  opacity: 1;
+}
+
+/* Keep running state always visible */
+.ag-theme-astra .actions-cell .play-button:disabled {
+  opacity: 1;
+}
+
+/* Hide checkboxes in ALL header cells by default except select */
+.ag-theme-astra .ag-header-cell:not(.checkbox-header) .ag-header-select-all,
+.ag-theme-astra .ag-header-cell:not(.checkbox-header) .ag-checkbox {
+  display: none !important;
+}
+
+/* Show and center checkbox ONLY in the checkbox column */
+.ag-theme-astra .checkbox-header .ag-header-select-all {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* AI response cell - 13px font size to match other cells */
+.ag-theme-astra .ai-response-cell {
+  padding: 4px !important;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  word-break: break-word;
+}
+
+.ag-theme-astra .ai-response-cell .ai-response-prose {
+  font-size: 13px;
+  color: #52525B; /* rgb(82, 82, 91) - zinc-600 */
+}
+
+.ag-theme-astra .ai-response-cell .ai-response-prose p {
+  font-size: 13px;
+  margin: 0;
+  color: #52525B; /* rgb(82, 82, 91) - zinc-600 */
+}
+
+.ag-theme-astra .ai-response-cell .ai-response-prose ul,
+.ag-theme-astra .ai-response-cell .ai-response-prose ol,
+.ag-theme-astra .ai-response-cell .ai-response-prose li {
+  font-size: 13px;
+  color: #52525B; /* rgb(82, 82, 91) - zinc-600 */
+}
+
+.ag-theme-astra .ai-response-cell .ai-response-prose strong {
+  color: #52525B; /* rgb(82, 82, 91) - zinc-600 */
+}
+
+/* Expected answer cell */
+.ag-theme-astra .expected-answer-cell {
+  color: #52525B !important; /* rgb(82, 82, 91) - zinc-600 */
+  font-size: 13px;
+}
+
+/* Leading questions cell */
+.ag-theme-astra .leading-questions-cell {
+  color: #52525B !important; /* rgb(82, 82, 91) - zinc-600 */
+  font-size: 13px;
+}
+
+/* Metrics cell */
+.ag-theme-astra .metrics-cell {
+  padding: 4px !important;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  margin-bottom: 2px;
+}
+
+/* Column menu & filters */
+.ag-theme-astra .ag-menu {
+  background-color: white;
+  border: 1px solid var(--ag-border-color);
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.ag-theme-astra .ag-menu-option {
+  padding: 8px 12px;
+  font-size: 14px;
+}
+
+.ag-theme-astra .ag-menu-option:hover {
+  background-color: var(--ag-row-hover-color);
+}
+
+.ag-theme-astra .ag-menu-option-active {
+  background-color: var(--ag-selected-row-background-color);
+}
+
+/* Filter styling */
+.ag-theme-astra .ag-filter {
+  padding: 12px;
+}
+
+.ag-theme-astra .ag-filter-toolpanel-group-container {
+  padding: 8px;
+}
+
+.ag-theme-astra .ag-text-field-input {
+  border: 1px solid var(--ag-border-color);
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 14px;
+}
+
+.ag-theme-astra .ag-text-field-input:focus {
+  border-color: var(--ag-input-focus-border-color);
+  box-shadow: var(--ag-input-focus-box-shadow);
+  outline: none;
+}
+
+/* Horizontal scroll */
+.ag-theme-astra .ag-body-horizontal-scroll {
+  height: 8px !important;
+}
+
+.ag-theme-astra .ag-body-horizontal-scroll-viewport {
+  height: 8px !important;
+}
+
+/* Pinned columns */
+.ag-theme-astra .ag-pinned-left-header,
+.ag-theme-astra .ag-pinned-left-cols-container {
+  border-right: 1px solid var(--ag-border-color);
+}
+
+.ag-theme-astra .ag-pinned-right-header,
+.ag-theme-astra .ag-pinned-right-cols-container {
+  border-left: 1px solid var(--ag-border-color);
+}
+
+/* Row drag handle */
+.ag-theme-astra .ag-drag-handle {
+  color: #9CA3AF;
+  cursor: grab;
+}
+
+.ag-theme-astra .ag-drag-handle:hover {
+  color: #6B7280;
+}
+
+/* No rows overlay */
+.ag-theme-astra .ag-overlay-no-rows-wrapper {
+  padding: 48px;
+}
+
+/* Loading overlay */
+.ag-theme-astra .ag-overlay-loading-wrapper {
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+/* Context menu */
+.ag-theme-astra .ag-popup-child {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Tooltip styling */
+.ag-theme-astra .ag-tooltip {
+  background-color: #1F2937;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  max-width: 300px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Compact view mode - matches Figma 36px row height */
+.ag-theme-astra.compact-view .ag-row {
+  height: 36px !important;
+}
+
+.ag-theme-astra.compact-view .ag-cell {
+  padding: 4px !important;
+  font-size: 13px;
+}
+
+/* Expanded view mode */
+.ag-theme-astra.expanded-view .ag-row {
+  min-height: 48px;
+}
+
+.ag-theme-astra.expanded-view .ag-cell {
+  padding: 4px !important;
+}
+
+/* Remove AG Grid branding */
+.ag-theme-astra .ag-watermark {
+  display: none !important;
+}
+
+/* Status bar (if used) */
+.ag-theme-astra .ag-status-bar {
+  background-color: var(--ag-header-background-color);
+  border-top: 1px solid var(--ag-border-color);
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--ag-secondary-foreground-color);
+}
+
+/* Column header right border for resize indication */
+.ag-theme-astra .ag-header-cell:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 25%;
+  height: 50%;
+  width: 1px;
+  background-color: transparent;
+}
+
+.ag-theme-astra .ag-header-cell:hover:not(:last-child)::after {
+  background-color: var(--ag-border-color);
+}
+
+/* Animations */
+.ag-theme-astra .ag-row {
+  transition: transform 200ms ease, opacity 200ms ease;
+}
+
+.ag-theme-astra .ag-row-animation {
+  animation: row-fade-in 200ms ease;
+}
+
+@keyframes row-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ========================================
+   Custom Cell Renderer Overflow Fix
+   ======================================== */
+
+/* Fix for custom cell renderers - ensure they respect cell width */
+.ag-theme-astra .ai-response-prose {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+/* ========================================
+   Notion-style Cell Editor Animation
+   ======================================== */
+
+@keyframes notion-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Cell editor popup container styling */
+.ag-theme-astra .ag-popup-editor,
+.ag-popup-editor {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+/* Ensure popup is visible when rendered in document.body */
+.ag-popup {
+  z-index: 9999 !important;
+}
+
+.ag-popup-editor .ag-large-text {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Running row styling - disable interaction and show visual feedback */
+.ag-theme-astra .ag-row.row-running {
+  background-color: #f8fafc !important;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.ag-theme-astra .ag-row.row-running .ag-cell {
+  color: #94a3b8 !important;
+}
+
+.ag-theme-astra .ag-row.row-running::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(23, 61, 166, 0.05) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: running-shimmer 1.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes running-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
