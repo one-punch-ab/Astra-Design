@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef } from 'react';
 import { v4 as uuid } from 'uuid';
 import type {
   TestCaseRow,
@@ -8,6 +8,17 @@ import type {
   AutoGenerateConfig,
 } from '@/types/test-cases.types';
 import { generateId, deepClone } from '@/lib/utils';
+
+// Simulation configuration for progressive improvement
+interface SimulationConfig {
+  targetScore: number;  // Target efficiency score to reach
+  runsToReach: number;  // Number of full runs to reach target
+}
+
+const DEFAULT_SIMULATION_CONFIG: SimulationConfig = {
+  targetScore: 88,
+  runsToReach: 3,
+};
 
 // Sample test case data for demo
 const createSampleTestCases = (): TestCaseRow[] => [
@@ -73,6 +84,21 @@ export function useTestCases(initialData?: TestCaseRow[]) {
   const [searchQuery, setSearchQuery] = useState('');
   const [runningIds, setRunningIds] = useState<Set<string>>(new Set());
   const [isRunningTests, setIsRunningTests] = useState(false);
+  
+  // Progress tracking state
+  const [testProgress, setTestProgress] = useState<{
+    completed: number;
+    total: number;
+    startTime: number | null;
+    estimatedTimeRemaining: number | null;
+  }>({ completed: 0, total: 0, startTime: null, estimatedTimeRemaining: null });
+  const stopRequestedRef = useRef(false);
+  
+  // Simulation state - use ref for immediate access, state for UI
+  const [isSimulationMode, setIsSimulationMode] = useState(false);
+  const [simulationRunCount, setSimulationRunCount] = useState(0);
+  const simulationConfigRef = useRef<SimulationConfig>(DEFAULT_SIMULATION_CONFIG);
+  const isSimulationModeRef = useRef(false); // Ref for immediate access in callbacks
 
   // Add a new test case
   const addTestCase = useCallback((testCase: Partial<TestCaseRow>) => {
@@ -131,19 +157,81 @@ export function useTestCases(initialData?: TestCaseRow[]) {
     });
   }, []);
 
+  // Calculate accuracy based on simulation progress
+  const calculateSimulationAccuracy = useCallback((currentRun: number): { accuracy: number; passed: boolean } => {
+    const config = simulationConfigRef.current;
+    
+    // Progressive improvement over runs
+    // Run 1: 65-80% accuracy, ~50% pass rate
+    // Run 2: 75-88% accuracy, ~75% pass rate  
+    // Run 3: 85-98% accuracy, ~95% pass rate (guarantees reaching 88% efficiency)
+    
+    let minAccuracy: number;
+    let maxAccuracy: number;
+    let guaranteedPassChance: number;
+    
+    if (currentRun === 1) {
+      minAccuracy = 65;
+      maxAccuracy = 80;
+      guaranteedPassChance = 0.5; // 50% chance to force pass
+    } else if (currentRun === 2) {
+      minAccuracy = 75;
+      maxAccuracy = 88;
+      guaranteedPassChance = 0.75; // 75% chance to force pass
+    } else {
+      // Run 3 and beyond - ensure high pass rate
+      minAccuracy = 85;
+      maxAccuracy = 98;
+      guaranteedPassChance = 0.95; // 95% chance to force pass
+    }
+    
+    // Determine if this test should be guaranteed to pass
+    const shouldPass = Math.random() < guaranteedPassChance;
+    
+    let accuracy: number;
+    if (shouldPass) {
+      // Ensure accuracy is above pass threshold (80)
+      accuracy = Math.round(Math.max(82, minAccuracy) + Math.random() * (maxAccuracy - Math.max(82, minAccuracy)));
+    } else {
+      // Allow some failures
+      accuracy = Math.round(minAccuracy + Math.random() * (maxAccuracy - minAccuracy));
+    }
+    
+    const passed = accuracy >= 80;
+    
+    return { accuracy: Math.min(accuracy, 99), passed };
+  }, []);
+
   // Run test for a single test case (simulated)
-  const runTest = useCallback(async (id: string) => {
+  // simulationRun is passed directly to avoid React state timing issues
+  const runTest = useCallback(async (id: string, simulationRun?: number) => {
     // Set status to running and track running ID
     setRunningIds(prev => new Set(prev).add(id));
     updateTestCase(id, { runStatus: 'running' });
 
-    // Simulate API call delay
-    await new Promise((resolve) => setTimeout(resolve, 2000 + Math.random() * 2000));
+    // Check simulation mode from ref (immediate access) not state
+    const inSimulationMode = isSimulationModeRef.current;
+    
+    // Simulate API call delay (shorter in simulation mode)
+    const delay = inSimulationMode ? 300 + Math.random() * 300 : 2000 + Math.random() * 2000;
+    await new Promise((resolve) => setTimeout(resolve, delay));
 
-    // Simulate response
-    const accuracy = Math.floor(70 + Math.random() * 30);
+    // Determine accuracy based on mode
+    let accuracy: number;
+    let passed: boolean;
+    
+    if (inSimulationMode && simulationRun !== undefined) {
+      // Use simulation-based accuracy that improves over runs
+      const result = calculateSimulationAccuracy(simulationRun);
+      accuracy = result.accuracy;
+      passed = result.passed;
+    } else {
+      // Normal random accuracy
+      accuracy = Math.floor(70 + Math.random() * 30);
+      passed = accuracy >= 80;
+    }
+    
     const latency = Math.round((0.5 + Math.random() * 3) * 10) / 10; // Round to 1 decimal place
-    const passed = accuracy >= 80;
 
     updateTestCase(id, {
       runStatus: 'complete',
@@ -164,19 +252,96 @@ export function useTestCases(initialData?: TestCaseRow[]) {
       next.delete(id);
       return next;
     });
-  }, [updateTestCase]);
+  }, [updateTestCase, calculateSimulationAccuracy]);
 
-  // Run multiple tests
-  const runTests = useCallback(async (ids: string[]) => {
+  // Run multiple tests with progress tracking
+  const runTests = useCallback(async (ids: string[], simulationRun?: number) => {
     setIsRunningTests(true);
+    stopRequestedRef.current = false;
+    
+    const total = ids.length;
+    const startTime = Date.now();
+    setTestProgress({ completed: 0, total, startTime, estimatedTimeRemaining: null });
+    
     try {
-      for (const id of ids) {
-        await runTest(id);
+      for (let i = 0; i < ids.length; i++) {
+        // Check if stop was requested
+        if (stopRequestedRef.current) {
+          break;
+        }
+        
+        await runTest(ids[i], simulationRun);
+        
+        const completed = i + 1;
+        const elapsed = Date.now() - startTime;
+        const avgTimePerTest = elapsed / completed;
+        const remaining = total - completed;
+        const estimatedTimeRemaining = Math.round((avgTimePerTest * remaining) / 1000); // in seconds
+        
+        setTestProgress({
+          completed,
+          total,
+          startTime,
+          estimatedTimeRemaining: remaining > 0 ? estimatedTimeRemaining : null,
+        });
       }
     } finally {
       setIsRunningTests(false);
+      stopRequestedRef.current = false;
+      // Reset progress after a short delay to show completion
+      setTimeout(() => {
+        setTestProgress({ completed: 0, total: 0, startTime: null, estimatedTimeRemaining: null });
+      }, 1000);
     }
   }, [runTest]);
+  
+  // Stop running tests
+  const stopTests = useCallback(() => {
+    stopRequestedRef.current = true;
+  }, []);
+
+  // Run simulation - runs all tests multiple times with improving scores
+  const runSimulation = useCallback(async (
+    ids: string[],
+    config: SimulationConfig = DEFAULT_SIMULATION_CONFIG,
+    onRunComplete?: (runNumber: number) => void
+  ) => {
+    // Set ref FIRST for immediate access in callbacks
+    isSimulationModeRef.current = true;
+    simulationConfigRef.current = config;
+    
+    // Then set state for UI updates
+    setIsSimulationMode(true);
+    setSimulationRunCount(0);
+
+    try {
+      for (let run = 1; run <= config.runsToReach; run++) {
+        setSimulationRunCount(run);
+        
+        // Run all tests for this iteration
+        await runTests(ids, run);
+        
+        // Callback for each run completion
+        onRunComplete?.(run);
+        
+        // Small delay between runs for visual feedback
+        if (run < config.runsToReach) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
+    } finally {
+      // Reset both ref and state
+      isSimulationModeRef.current = false;
+      setIsSimulationMode(false);
+    }
+  }, [runTests]);
+
+  // Reset simulation state
+  const resetSimulation = useCallback(() => {
+    setSimulationRunCount(0);
+    setIsSimulationMode(false);
+    isSimulationModeRef.current = false;
+  }, []);
 
   // Give feedback on AI response
   const giveFeedback = useCallback((id: string, feedback: 'up' | 'down') => {
@@ -296,6 +461,12 @@ export function useTestCases(initialData?: TestCaseRow[]) {
     searchQuery,
     isRunningTests,
     runningIds,
+    // Progress tracking
+    testProgress,
+    // Simulation state
+    isSimulationMode,
+    simulationRunCount,
+    // Actions
     setTestCases,
     setFilters,
     setSortConfig,
@@ -307,6 +478,9 @@ export function useTestCases(initialData?: TestCaseRow[]) {
     reorderTestCases,
     runTest,
     runTests,
+    stopTests,
+    runSimulation,
+    resetSimulation,
     giveFeedback,
     importFromCSV,
     autoGenerate,

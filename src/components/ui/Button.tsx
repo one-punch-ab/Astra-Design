@@ -62,7 +62,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     const sizeStyles = {
       xs: 'h-5 px-2 text-[11px]',   // Micro - 20px
       sm: 'h-6 px-3 text-xs',       // Mini - 24px
-      md: 'h-8 px-4 text-sm',       // Regular - 32px (DEFAULT)
+      md: 'h-fit w-fit px-2.5 py-2 text-sm',       // Regular - fit-content (DEFAULT)
       lg: 'h-10 px-5 text-sm',      // Large - 40px
     };
 

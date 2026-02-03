@@ -65,7 +65,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
           isOpen && 'ring-2 ring-blue-500 border-transparent'
         )}
       >
-        <span className={cn(!selectedOption && 'text-gray-400')}>
+        <span className={cn('truncate', !selectedOption && 'text-gray-400')}>
           {selectedOption?.label || placeholder}
         </span>
         <ChevronDown
@@ -79,7 +79,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
       {isOpen && (
         <div
           className={cn(
-            'absolute z-50 w-full mt-1 py-1',
+            'absolute z-[100] min-w-full w-max mt-1 py-1',
             'bg-white border border-gray-200 rounded-astra-card shadow-astra-md',
             'max-h-60 overflow-auto'
           )}
@@ -98,7 +98,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
                 option.value === value && 'bg-astra-primary-light'
               )}
             >
-              <span>{option.label}</span>
+              <span className="whitespace-nowrap">{option.label}</span>
               {option.value === value && (
                 <Check className="w-4 h-4 text-astra-primary" />
               )}

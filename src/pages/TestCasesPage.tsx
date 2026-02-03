@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { LeftNavBar, TopNavigation } from '@/components/layout';
 import { 
   TestCasesTable, 
@@ -8,6 +8,8 @@ import {
   ImportCSVModal,
   AutoGenerateModal,
   FixesOverlay,
+  EfficiencyBanner,
+  TestProgressBanner,
   type ColumnConfig,
 } from '@/components/test-cases';
 import {
@@ -23,7 +25,7 @@ import {
 import { useTestCases, useWorksheets } from '@/hooks';
 import { downloadFile } from '@/lib/utils';
 import type { ViewMode, FilterConfig, CSVColumnMapping, AutoGenerateConfig, ColumnType, TestCaseRow } from '@/types/test-cases.types';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, FlaskConical } from 'lucide-react';
 
 export const TestCasesPage: React.FC = () => {
   // Worksheet management
@@ -50,6 +52,9 @@ export const TestCasesPage: React.FC = () => {
     filters,
     searchQuery,
     isRunningTests,
+    testProgress,
+    isSimulationMode,
+    simulationRunCount,
     setFilters,
     setSearchQuery,
     addTestCase,
@@ -58,6 +63,9 @@ export const TestCasesPage: React.FC = () => {
     reorderTestCases,
     runTest,
     runTests,
+    stopTests,
+    runSimulation,
+    resetSimulation,
     giveFeedback,
     importFromCSV,
     autoGenerate,
@@ -76,6 +84,11 @@ export const TestCasesPage: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isLoadingSampleData, setIsLoadingSampleData] = useState(false);
   const [fixesTestCase, setFixesTestCase] = useState<TestCaseRow | null>(null);
+  
+  // Efficiency banner state
+  const [showEfficiencyBanner, setShowEfficiencyBanner] = useState(false);
+  const [bannerDismissed, setBannerDismissed] = useState(false);
+  const [lastSimulationRunCount, setLastSimulationRunCount] = useState(0);
 
   // Track syncing state to prevent circular updates
   const isSyncingRef = useRef(false);
@@ -222,13 +235,13 @@ export const TestCasesPage: React.FC = () => {
     }
   }, [loadSampleDataToActiveWorksheet]);
 
-  // Compute metrics - only show when tests have been run
-  const metrics = React.useMemo(() => {
+  // Compute metrics and efficiency score - only show when tests have been run
+  const { metrics, efficiencyScore } = useMemo(() => {
     const withMetrics = filteredTestCases.filter(tc => tc.metrics);
     
     // Only return metrics if at least one test has been run
     if (withMetrics.length === 0) {
-      return undefined;
+      return { metrics: undefined, efficiencyScore: 0 };
     }
     
     const passed = withMetrics.filter(tc => tc.metrics?.status === 'passed').length;
@@ -241,12 +254,49 @@ export const TestCasesPage: React.FC = () => {
 
     const efficiencyScore = Math.round((passed / withMetrics.length) * 100);
     
-    return [
-      { label: 'Efficiency Score', value: `${efficiencyScore}%`, variant: 'warning' as const, icon: 'efficiency' as const },
+    const metricsData = [
+      { label: 'Efficiency Score', value: `${efficiencyScore}%`, variant: (efficiencyScore >= 85 ? 'success' : 'warning') as const, icon: 'efficiency' as const },
       { label: 'Accuracy', value: `${avgAccuracy}%`, variant: 'success' as const, icon: 'accuracy' as const },
       { label: 'Latency', value: `${avgLatency} sec`, variant: 'warning' as const, icon: 'latency' as const },
     ];
+    
+    return { metrics: metricsData, efficiencyScore };
   }, [filteredTestCases]);
+
+  // Show efficiency banner when score >= 85% and not dismissed
+  useEffect(() => {
+    if (efficiencyScore >= 85 && !bannerDismissed && !isRunningTests) {
+      setShowEfficiencyBanner(true);
+      setLastSimulationRunCount(simulationRunCount);
+    }
+  }, [efficiencyScore, bannerDismissed, isRunningTests, simulationRunCount]);
+
+  // Handle banner dismiss
+  const handleBannerDismiss = useCallback(() => {
+    setShowEfficiencyBanner(false);
+    setBannerDismissed(true);
+  }, []);
+
+  // Handle running the simulation (3 runs to reach 88% efficiency)
+  const handleRunSimulation = useCallback(async () => {
+    // Reset banner state for new simulation
+    setBannerDismissed(false);
+    setShowEfficiencyBanner(false);
+    
+    // Get all test case IDs - must have test cases to run simulation
+    const allIds = filteredTestCases.map(tc => tc.id);
+    
+    if (allIds.length === 0) {
+      console.warn('No test cases to run simulation on');
+      return;
+    }
+    
+    // Run simulation with config: target 88%, reach in 3 runs
+    await runSimulation(allIds, {
+      targetScore: 88,
+      runsToReach: 3,
+    });
+  }, [filteredTestCases, runSimulation]);
 
   // Check if empty
   const isEmpty = filteredTestCases.length === 0 && !searchQuery && filters.length === 0;
@@ -277,6 +327,29 @@ export const TestCasesPage: React.FC = () => {
               isLoading={isRunningTests}
             />
           </div>
+
+          {/* Test Progress Banner - shows when tests are running */}
+          {isRunningTests && testProgress.total > 0 && (
+            <div className="px-4 pt-3">
+              <TestProgressBanner
+                completed={testProgress.completed}
+                total={testProgress.total}
+                estimatedTimeRemaining={testProgress.estimatedTimeRemaining}
+                onStop={stopTests}
+              />
+            </div>
+          )}
+
+          {/* Efficiency Banner - shows when score >= 85% */}
+          {showEfficiencyBanner && efficiencyScore >= 85 && !isRunningTests && (
+            <div className="px-4 pt-3">
+              <EfficiencyBanner
+                efficiencyScore={efficiencyScore}
+                onDismiss={handleBannerDismiss}
+                runCount={lastSimulationRunCount > 0 ? lastSimulationRunCount : undefined}
+              />
+            </div>
+          )}
 
           {/* Controls row with worksheet tabs (always visible) and CTAs (hidden when empty) */}
           <div className="px-4 py-2">
@@ -323,7 +396,7 @@ export const TestCasesPage: React.FC = () => {
               <EmptyState
                 onUploadCSV={() => setShowImport(true)}
                 onAutoGenerate={() => setShowAutoGenerate(true)}
-                onDownloadTemplate={handleDownloadTemplate}
+                onManualAdd={handleAddRow}
               />
             ) : (
               <TestCasesTable
@@ -349,9 +422,31 @@ export const TestCasesPage: React.FC = () => {
             )}
           </main>
 
-          {/* Load sample data CTA - visible when empty */}
-          {isEmpty && (
-            <div className="absolute bottom-6 right-6">
+          {/* Simulation & Sample Data CTAs */}
+          <div className="absolute bottom-6 right-6 flex items-center gap-3">
+            {/* Run Simulation button - visible when test cases exist */}
+            {!isEmpty && (
+              <button
+                onClick={handleRunSimulation}
+                disabled={isSimulationMode || isRunningTests}
+                className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-lg shadow-md text-sm font-medium text-white hover:from-purple-600 hover:to-indigo-700 hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSimulationMode ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Run {simulationRunCount}/3...</span>
+                  </>
+                ) : (
+                  <>
+                    <FlaskConical className="w-4 h-4" />
+                    <span>Run Simulation (3x)</span>
+                  </>
+                )}
+              </button>
+            )}
+            
+            {/* Load sample data CTA - visible when empty */}
+            {isEmpty && (
               <button
                 onClick={handleLoadSampleData}
                 disabled={isLoadingSampleData}
@@ -370,8 +465,8 @@ export const TestCasesPage: React.FC = () => {
                 )}
                 {isLoadingSampleData ? 'Loading...' : 'Load sample data'}
               </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
 

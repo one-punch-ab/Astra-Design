@@ -95,9 +95,6 @@ export const AutoGenerateModal: React.FC<AutoGenerateModalProps> = ({
                   <div className="flex items-center gap-2">
                     <BookOpen className="w-4 h-4 text-gray-500" />
                     <span className="font-medium text-sm">Knowledge base</span>
-                    <span className="text-xs text-astra-primary bg-astra-primary-light px-1.5 py-0.5 rounded">
-                      Recommended
-                    </span>
                   </div>
                   <p className="text-sm text-gray-500 mt-0.5">
                     Generate questions based on your agent's knowledge sources and training data

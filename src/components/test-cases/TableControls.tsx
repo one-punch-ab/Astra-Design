@@ -14,12 +14,13 @@ import {
   Play,
   FlaskConical,
   MoreVertical,
-  SlidersHorizontal,
+  Columns3,
   Sparkles,
 } from 'lucide-react';
-import type { ViewMode, Worksheet, FilterConfig, CustomColumn } from '@/types/test-cases.types';
+import type { ViewMode, Worksheet, FilterConfig, SortConfig, CustomColumn } from '@/types/test-cases.types';
 import { WorksheetTabs } from './WorksheetTabs';
 import { FilterModal } from './modals/FilterModal';
+import { SortModal } from './modals/SortModal';
 import { ManageColumnsDropdown, buildColumnsConfig, type ColumnConfig } from './ManageColumnsDropdown';
 
 interface TableControlsProps {
@@ -87,10 +88,13 @@ export const TableControls: React.FC<TableControlsProps> = ({
   const [showViewMenu, setShowViewMenu] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
+  const [showSortModal, setShowSortModal] = useState(false);
+  const [sorts, setSorts] = useState<SortConfig[]>([]);
   const [showManageColumns, setShowManageColumns] = useState(false);
   const [showAddTestCasesMenu, setShowAddTestCasesMenu] = useState(false);
   const [columnsConfig, setColumnsConfig] = useState<ColumnConfig[]>(() => buildColumnsConfig(customColumns));
   const filterButtonRef = useRef<HTMLButtonElement>(null);
+  const sortButtonRef = useRef<HTMLButtonElement>(null);
 
   // Update columns config when custom columns change
   React.useEffect(() => {
@@ -188,54 +192,62 @@ export const TableControls: React.FC<TableControlsProps> = ({
         {/* Table controls button group */}
         <div className="flex items-center border border-gray-300 rounded-md">
           {/* Filter button */}
-          <button
-            ref={filterButtonRef}
-            onClick={() => setShowFilterModal(true)}
-            className={cn(
-              'inline-flex items-center gap-2 h-8 px-3',
-              'text-sm font-medium text-gray-700',
-              'bg-white hover:bg-gray-50 transition-colors',
-              filters.length > 0 && 'text-astra-primary'
-            )}
-            style={{ borderRadius: '6px 0px 0px 6px', borderRight: '1px solid rgb(209, 213, 219)' }}
-          >
-            <FilterIcon className="w-4 h-4" />
-            Filter
+          <div className="relative">
+            <button
+              ref={filterButtonRef}
+              onClick={() => setShowFilterModal(true)}
+              className={cn(
+                'inline-flex items-center justify-center h-8 w-8',
+                'text-gray-700',
+                'bg-white hover:bg-gray-50 transition-colors',
+                filters.length > 0 && 'text-astra-primary'
+              )}
+              style={{ borderRadius: '6px 0px 0px 6px', borderRight: '1px solid rgb(209, 213, 219)' }}
+              title="Filter"
+            >
+              <FilterIcon className="w-4 h-4" />
+            </button>
             {filters.length > 0 && (
-              <span className="ml-1 px-1.5 py-0.5 text-xs bg-astra-primary text-white rounded-full">
-                {filters.length}
-              </span>
+              <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-blue-500 rounded-full" />
             )}
-          </button>
+          </div>
 
           {/* Sort button */}
-          <button
-            className={cn(
-              'inline-flex items-center gap-2 h-8 px-3',
-              'text-sm font-medium text-gray-700',
-              'bg-white hover:bg-gray-50 transition-colors',
-              'border-r border-gray-300'
+          <div className="relative">
+            <button
+              ref={sortButtonRef}
+              onClick={() => setShowSortModal(true)}
+              className={cn(
+                'inline-flex items-center justify-center h-8 w-8',
+                'text-gray-700',
+                'bg-white hover:bg-gray-50 transition-colors',
+                'border-r border-gray-300',
+                sorts.length > 0 && 'text-astra-primary'
+              )}
+              style={{ borderRadius: 0 }}
+              title="Sort"
+            >
+              <ArrowUpDown className="w-4 h-4" />
+            </button>
+            {sorts.length > 0 && (
+              <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-blue-500 rounded-full" />
             )}
-            style={{ borderRadius: 0 }}
-          >
-            <ArrowUpDown className="w-4 h-4" />
-            Sort
-          </button>
+          </div>
 
           {/* Manage columns button */}
           <div className="relative">
             <button
               onClick={() => setShowManageColumns(!showManageColumns)}
               className={cn(
-                'inline-flex items-center gap-2 h-8 px-3',
-                'text-sm font-medium text-gray-700',
+                'inline-flex items-center justify-center h-8 w-8',
+                'text-gray-700',
                 'bg-white hover:bg-gray-50 transition-colors',
                 'border-r border-gray-300'
               )}
               style={{ borderRadius: 0 }}
+              title="Manage columns"
             >
-              <SlidersHorizontal className="w-4 h-4" />
-              Manage columns
+              <Columns3 className="w-4 h-4" />
             </button>
 
             {/* Manage columns dropdown */}
@@ -349,7 +361,7 @@ export const TableControls: React.FC<TableControlsProps> = ({
             ) : (
               <Play className="w-4 h-4" fill="currentColor" />
             )}
-            {isRunning ? 'Running tests...' : 'Run all test cases'}
+            {isRunning ? 'Running...' : 'Run all'}
           </button>
 
           {/* Add test cases - Primary CTA with dropdown */}
@@ -450,6 +462,15 @@ export const TableControls: React.FC<TableControlsProps> = ({
           filters={filters}
           onApply={onApplyFilters}
           anchorRef={filterButtonRef}
+        />
+
+        {/* Sort Modal - positioned near sort button */}
+        <SortModal
+          open={showSortModal}
+          onOpenChange={setShowSortModal}
+          sorts={sorts}
+          onApply={setSorts}
+          anchorRef={sortButtonRef}
         />
       </div>
       )}

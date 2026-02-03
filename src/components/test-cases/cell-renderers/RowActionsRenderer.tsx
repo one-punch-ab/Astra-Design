@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import type { ICellRendererParams } from 'ag-grid-community';
 import { cn } from '@/lib/utils';
 import { Play, Loader2 } from 'lucide-react';
@@ -14,11 +14,17 @@ export const RowActionsRenderer: React.FC<RowActionsRendererProps> = (props) => 
 
   if (!data) return null;
 
-  const handleRunTest = (e: React.MouseEvent) => {
+  // Comprehensive event stopper to prevent AG Grid from starting cell edit
+  const stopAllEvents = useCallback((e: React.MouseEvent | React.PointerEvent) => {
     e.stopPropagation();
     e.preventDefault();
+    e.nativeEvent.stopImmediatePropagation();
+  }, []);
+
+  const handleRunTest = useCallback((e: React.MouseEvent) => {
+    stopAllEvents(e);
     onRunTest?.(data.id);
-  };
+  }, [data.id, onRunTest, stopAllEvents]);
 
   const isRunning = data.runStatus === 'running';
 
@@ -33,8 +39,12 @@ export const RowActionsRenderer: React.FC<RowActionsRendererProps> = (props) => 
             isRunning && 'bg-blue-50'
           )}
           onClick={handleRunTest}
+          onMouseDown={stopAllEvents}
+          onPointerDown={stopAllEvents}
+          onDoubleClick={stopAllEvents}
           disabled={isRunning}
           title="Run test"
+          data-action="run-test"
         >
           {isRunning ? (
             <Loader2 className="w-3.5 h-3.5 text-blue-600 animate-spin" />

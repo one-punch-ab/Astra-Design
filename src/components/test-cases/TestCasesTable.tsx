@@ -6,6 +6,7 @@ import type {
   CellValueChangedEvent,
   RowDragEndEvent,
   SelectionChangedEvent,
+  CellClickedEvent,
   GridApi,
 } from 'ag-grid-community';
 import 'ag-grid-community/styles/ag-grid.css';
@@ -451,6 +452,16 @@ export const TestCasesTable: React.FC<TestCasesTableProps> = ({
     'row-running': (params: { data: TestCaseRow | undefined }) => params.data?.runStatus === 'running',
   }), []);
 
+  // Cell clicked event - suppress edit when clicking on action buttons
+  const onCellClicked = useCallback((event: CellClickedEvent) => {
+    const target = event.event?.target as HTMLElement;
+    // Check if click was on run test button or its children
+    if (target?.closest('[data-action="run-test"]') || target?.closest('.play-button-wrapper')) {
+      // Stop the grid from starting edit mode
+      event.api.stopEditing(true);
+    }
+  }, []);
+
   return (
     <div className="flex flex-col h-full">
       <div className="relative flex-1">
@@ -489,6 +500,7 @@ export const TestCasesTable: React.FC<TestCasesTableProps> = ({
           onCellValueChanged={onCellValueChanged}
           onRowDragEnd={onRowDragEnd}
           onSelectionChanged={handleSelectionChanged}
+          onCellClicked={onCellClicked}
           // Tooltips - show full content on hover
           tooltipShowDelay={300}
           tooltipHideDelay={0}

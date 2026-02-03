@@ -279,7 +279,7 @@ export const FixesOverlay: React.FC<FixesOverlayProps> = ({ testCase, onClose })
           </div>
 
           {/* Comparison Section */}
-          <div className="px-6 py-4 border-b border-gray-200">
+          <div className="px-6 pt-4 pb-3 border-b border-gray-200">
             <h3 className="text-sm font-medium text-gray-900 mb-3">Response Comparison</h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -290,8 +290,13 @@ export const FixesOverlay: React.FC<FixesOverlayProps> = ({ testCase, onClose })
               </div>
               <div>
                 <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">AI Response</p>
-                <div className="p-3 bg-yellow-100 border border-yellow-300 rounded-lg text-[13px] text-gray-700 max-h-32 overflow-auto">
-                  {testCase.aiResponse?.content || 'No response generated'}
+                <div className="flex flex-col gap-3">
+                  <div className="p-3 bg-yellow-100 border border-yellow-300 rounded-lg text-[13px] text-gray-700 max-h-32 overflow-auto">
+                    {testCase.aiResponse?.content || 'No response generated'}
+                  </div>
+                  <button className="text-xs font-medium text-blue-600 hover:text-blue-800 hover:underline self-start transition-colors">
+                    View entire conversation
+                  </button>
                 </div>
               </div>
             </div>

@@ -400,6 +400,17 @@
   transition: transform 200ms ease;
 }
 
+/* Ensure run test button captures clicks and prevents cell edit */
+.ag-theme-astra .play-button-wrapper button {
+  position: relative;
+  z-index: 10;
+  cursor: pointer;
+}
+
+.ag-theme-astra .play-button-wrapper button[data-action="run-test"] {
+  pointer-events: auto !important;
+}
+
 /* Actions cell - for other columns */
 .ag-theme-astra .actions-cell {
   padding: 0 !important;
