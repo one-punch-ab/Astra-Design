@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Type, List, FileText, Plus } from 'lucide-react';
+import { Type, List, FileText, Plus, ChevronDown } from 'lucide-react';
 import type { ColumnType } from '@/types/test-cases.types';
 
 interface AddColumnDropdownProps {
@@ -12,6 +12,11 @@ const columnTypes: { value: ColumnType; label: string; icon: React.ReactNode }[]
     value: 'text',
     label: 'Text',
     icon: <Type className="w-4 h-4" />,
+  },
+  {
+    value: 'singleselect',
+    label: 'Single select',
+    icon: <ChevronDown className="w-4 h-4" />,
   },
   {
     value: 'multiselect',

@@ -23,6 +23,10 @@ import {
   StatusRenderer,
   MultiSelectCellEditor,
   MultiSelectCellRenderer,
+  SingleSelectCellEditor,
+  SingleSelectCellRenderer,
+  CategorySelectCellEditor,
+  CategorySelectCellRenderer,
   MarkdownCellRenderer,
   TextCellEditor,
 } from './cell-renderers';
@@ -30,6 +34,7 @@ import { AddColumnDropdown } from './AddColumnDropdown';
 import { CustomColumnHeader } from './CustomColumnHeader';
 import { ColumnHeader } from './ColumnHeader';
 import type { TestCaseRow, ViewMode, CustomColumn, ColumnType } from '@/types/test-cases.types';
+import { CATEGORY_OPTIONS } from '@/types/test-cases.types';
 
 interface TestCasesTableProps {
   testCases: TestCaseRow[];
@@ -164,6 +169,16 @@ export const TestCasesTable: React.FC<TestCasesTableProps> = ({
     };
 
     switch (col.type) {
+      case 'singleselect':
+        return {
+          ...baseColDef,
+          cellRenderer: SingleSelectCellRenderer,
+          cellEditor: SingleSelectCellEditor,
+          cellEditorParams: {
+            options: col.options || [],
+          },
+          cellEditorPopup: true,
+        };
       case 'multiselect':
         return {
           ...baseColDef,
@@ -257,6 +272,25 @@ export const TestCasesTable: React.FC<TestCasesTableProps> = ({
       autoHeight: isExpanded,
       cellStyle: isExpanded ? expandedCellStyle : truncateCellStyle,
       tooltipField: isExpanded ? undefined : 'question',
+    }),
+    // Category column - single select with colored tags
+    applyPinning({
+      headerName: 'Category',
+      field: 'category',
+      width: 180,
+      minWidth: 150,
+      editable: true,
+      cellRenderer: CategorySelectCellRenderer,
+      cellEditor: CategorySelectCellEditor,
+      cellEditorParams: {
+        options: [...CATEGORY_OPTIONS],
+      },
+      cellEditorPopup: true,
+      cellClass: 'editable-cell category-cell',
+      headerClass: 'header-gray-dark',
+      headerComponent: () => <ColumnHeader displayName="Category" iconType="dropdown" />,
+      wrapText: isExpanded,
+      autoHeight: isExpanded,
     }),
     applyPinning({
       headerName: 'Expected answer',

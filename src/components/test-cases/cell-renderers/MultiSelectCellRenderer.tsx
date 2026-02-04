@@ -10,11 +10,15 @@ export const MultiSelectCellRenderer: React.FC<MultiSelectCellRendererProps> = (
   const values = Array.isArray(value) ? value : value ? [value] : [];
 
   if (values.length === 0) {
-    return <span className="text-gray-400 text-sm">Select...</span>;
+    return (
+      <div className="flex items-center h-full">
+        <span className="text-gray-400 text-sm">Select...</span>
+      </div>
+    );
   }
 
   return (
-    <div className="flex flex-wrap gap-1 py-1">
+    <div className="flex flex-wrap items-center gap-1 h-full">
       {values.map((val, index) => (
         <span
           key={index}

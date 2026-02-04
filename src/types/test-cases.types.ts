@@ -19,10 +19,23 @@ export interface ChecklistItem {
   checked: boolean;
 }
 
+// Category options for test cases
+export const CATEGORY_OPTIONS = [
+  'Standard queries',
+  'Unauthorised requests',
+  'Jailbreak attempts',
+  'Off-topic questions',
+  'Casual language',
+  'Implied problems',
+] as const;
+
+export type TestCaseCategory = typeof CATEGORY_OPTIONS[number];
+
 // Test case row data structure
 export interface TestCaseRow {
   id: string;
   question: string;
+  category?: TestCaseCategory;
   expectedAnswer: string;
   leadingQuestions: string;
   aiResponse?: AIResponse;
@@ -68,7 +81,7 @@ export interface Worksheet {
 }
 
 // Column types for custom columns
-export type ColumnType = 'text' | 'multiselect' | 'markdown';
+export type ColumnType = 'text' | 'singleselect' | 'multiselect' | 'markdown';
 
 export interface CustomColumn {
   id: string;

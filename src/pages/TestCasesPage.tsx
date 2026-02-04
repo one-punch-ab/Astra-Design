@@ -10,6 +10,8 @@ import {
   FixesOverlay,
   EfficiencyBanner,
   TestProgressBanner,
+  RecommendationsBanner,
+  RecommendationsSummaryModal,
   type ColumnConfig,
 } from '@/components/test-cases';
 import {
@@ -89,6 +91,12 @@ export const TestCasesPage: React.FC = () => {
   const [showEfficiencyBanner, setShowEfficiencyBanner] = useState(false);
   const [bannerDismissed, setBannerDismissed] = useState(false);
   const [lastSimulationRunCount, setLastSimulationRunCount] = useState(0);
+  
+  // Recommendations banner/modal state
+  const [showRecommendationsBanner, setShowRecommendationsBanner] = useState(false);
+  const [showRecommendationsModal, setShowRecommendationsModal] = useState(false);
+  const [recommendationsBannerDismissed, setRecommendationsBannerDismissed] = useState(false);
+  const [wasRunningTests, setWasRunningTests] = useState(false);
 
   // Track syncing state to prevent circular updates
   const isSyncingRef = useRef(false);
@@ -271,10 +279,80 @@ export const TestCasesPage: React.FC = () => {
     }
   }, [efficiencyScore, bannerDismissed, isRunningTests, simulationRunCount]);
 
+  // Track when tests start running
+  useEffect(() => {
+    if (isRunningTests) {
+      setWasRunningTests(true);
+    }
+  }, [isRunningTests]);
+
+  // Show recommendations banner when tests complete and there are failures
+  useEffect(() => {
+    // Only check when tests just finished (was running, now not running)
+    if (wasRunningTests && !isRunningTests) {
+      setWasRunningTests(false);
+      
+      // Check for failed tests that need recommendations
+      const failedTests = filteredTestCases.filter(tc => tc.metrics?.status === 'failed');
+      
+      if (failedTests.length > 0 && !recommendationsBannerDismissed) {
+        // Small delay to let the progress banner clear first
+        setTimeout(() => {
+          setShowRecommendationsBanner(true);
+        }, 500);
+      }
+    }
+  }, [isRunningTests, wasRunningTests, filteredTestCases, recommendationsBannerDismissed]);
+
   // Handle banner dismiss
   const handleBannerDismiss = useCallback(() => {
     setShowEfficiencyBanner(false);
     setBannerDismissed(true);
+  }, []);
+
+  // Compute failed tests count and recommendations count for the banner
+  const { failedTestsCount, totalRecommendationsCount } = useMemo(() => {
+    const failedTests = filteredTestCases.filter(tc => tc.metrics?.status === 'failed');
+    // Each failed test generates 1-3 recommendations typically
+    const recommendationsCount = failedTests.reduce((acc, tc) => {
+      // Count actual recommendations if available, otherwise estimate based on metrics
+      if (tc.recommendations && tc.recommendations.length > 0) {
+        return acc + tc.recommendations.length;
+      }
+      // Estimate recommendations based on common failure patterns
+      let count = 0;
+      const accuracy = tc.metrics?.accuracy || 0;
+      const latency = tc.metrics?.latency || 0;
+      if (accuracy < 70) count++;
+      if (accuracy >= 70 && accuracy < 90) count++;
+      if (latency > 2) count++;
+      if (tc.aiResponse?.content && tc.expectedAnswer && 
+          tc.aiResponse.content.length < tc.expectedAnswer.length * 0.5) count++;
+      return acc + Math.max(count, 1);
+    }, 0);
+    
+    return {
+      failedTestsCount: failedTests.length,
+      totalRecommendationsCount: recommendationsCount,
+    };
+  }, [filteredTestCases]);
+
+  // Handle recommendations banner dismiss
+  const handleRecommendationsBannerDismiss = useCallback(() => {
+    setShowRecommendationsBanner(false);
+    setRecommendationsBannerDismissed(true);
+  }, []);
+
+  // Handle opening recommendations modal
+  const handleViewRecommendations = useCallback(() => {
+    setShowRecommendationsModal(true);
+    setShowRecommendationsBanner(false);
+  }, []);
+
+  // Handle viewing individual test case from recommendations modal
+  const handleViewTestCaseFromModal = useCallback((testCase: TestCaseRow) => {
+    setShowRecommendationsModal(false);
+    setFixesTestCase(testCase);
   }, []);
 
   // Handle running the simulation (3 runs to reach 88% efficiency)
@@ -282,6 +360,8 @@ export const TestCasesPage: React.FC = () => {
     // Reset banner state for new simulation
     setBannerDismissed(false);
     setShowEfficiencyBanner(false);
+    setRecommendationsBannerDismissed(false);
+    setShowRecommendationsBanner(false);
     
     // Get all test case IDs - must have test cases to run simulation
     const allIds = filteredTestCases.map(tc => tc.id);
@@ -347,6 +427,18 @@ export const TestCasesPage: React.FC = () => {
                 efficiencyScore={efficiencyScore}
                 onDismiss={handleBannerDismiss}
                 runCount={lastSimulationRunCount > 0 ? lastSimulationRunCount : undefined}
+              />
+            </div>
+          )}
+
+          {/* Recommendations Banner - shows after tests complete with failures */}
+          {showRecommendationsBanner && failedTestsCount > 0 && !isRunningTests && (
+            <div className="px-4 pt-3">
+              <RecommendationsBanner
+                failedCount={failedTestsCount}
+                totalRecommendations={totalRecommendationsCount}
+                onViewRecommendations={handleViewRecommendations}
+                onDismiss={handleRecommendationsBannerDismiss}
               />
             </div>
           )}
@@ -491,6 +583,15 @@ export const TestCasesPage: React.FC = () => {
         <FixesOverlay
           testCase={fixesTestCase}
           onClose={() => setFixesTestCase(null)}
+        />
+      )}
+
+      {/* Recommendations Summary Modal - consolidated view of all recommendations */}
+      {showRecommendationsModal && (
+        <RecommendationsSummaryModal
+          testCases={filteredTestCases}
+          onClose={() => setShowRecommendationsModal(false)}
+          onViewTestCase={handleViewTestCaseFromModal}
         />
       )}
 

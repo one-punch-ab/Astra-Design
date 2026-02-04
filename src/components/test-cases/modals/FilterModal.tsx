@@ -135,7 +135,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
       {/* Popover content */}
       <div
         ref={popoverRef}
-        className="fixed z-50 w-[640px] bg-white rounded-lg shadow-lg border border-gray-200 animate-in fade-in-0 zoom-in-95 duration-200"
+        className="fixed z-50 w-[720px] bg-white rounded-lg shadow-lg border border-gray-200 animate-in fade-in-0 zoom-in-95 duration-200"
         style={{
           top: position.top,
           left: position.left,
@@ -160,7 +160,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
         </div>
 
         {/* Body */}
-        <div className="px-4 py-3 space-y-3 max-h-[300px] overflow-auto">
+        <div className="px-4 py-3 space-y-3">
           {filters.map((filter, index) => (
             <div key={index} className="flex items-center gap-2">
               {/* Field selector */}
@@ -168,7 +168,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                 value={filter.field}
                 onChange={(val) => handleFilterChange(index, { field: val })}
                 options={FIELD_OPTIONS}
-                className="w-36"
+                className="flex-1"
               />
 
               {/* Operator selector */}
@@ -178,7 +178,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
                   handleFilterChange(index, { operator: val as FilterOperator })
                 }
                 options={OPERATOR_OPTIONS}
-                className="w-36"
+                className="flex-1"
               />
 
               {/* Value input */}

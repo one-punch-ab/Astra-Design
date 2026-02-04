@@ -54,8 +54,8 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       {/* Hero Section */}
       <div className="flex flex-col items-center text-center mb-10">
         {/* Icon */}
-        <div className="w-16 h-16 bg-astra-primary-light rounded-xl flex items-center justify-center mb-6">
-          <FlaskConical className="w-8 h-8 text-astra-primary" />
+        <div className="w-16 h-16 bg-blue-100 border border-blue-300 rounded-xl flex items-center justify-center mb-6">
+          <FlaskConical className="w-8 h-8 text-astra-primary-hover" />
         </div>
         
         {/* Headline */}

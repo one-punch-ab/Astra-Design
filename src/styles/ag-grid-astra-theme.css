@@ -169,18 +169,18 @@
   background-color: #DBEAFE !important;
 }
 
-/* Cell styling - aligned top-left with 4px padding */
+/* Cell styling - vertically centered with 4px padding */
 .ag-theme-astra .ag-cell:not(.checkbox-cell):not(.actions-cell) {
   padding: 4px !important;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: flex-start;
   line-height: 1.4;
 }
 
 .ag-theme-astra .ag-cell-value {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: flex-start;
   width: 100%;
 }
@@ -372,13 +372,30 @@
   padding: 0 !important;
 }
 
-.ag-theme-astra .checkbox-header .ag-header-cell-comp-wrapper,
+/* Hide the label container in checkbox header - it's empty and takes up space */
+.ag-theme-astra .checkbox-header .ag-cell-label-container {
+  display: none !important;
+}
+
+/* Make the wrapper fill the cell and center its content */
+.ag-theme-astra .checkbox-header .ag-header-cell-comp-wrapper {
+  position: absolute !important;
+  inset: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
 .ag-theme-astra .checkbox-header .ag-header-select-all,
 .ag-theme-astra .checkbox-header .ag-checkbox,
 .ag-theme-astra .checkbox-header .ag-input-wrapper,
 .ag-theme-astra .checkbox-header .ag-checkbox-input-wrapper {
-  width: 100% !important;
-  height: 100% !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;

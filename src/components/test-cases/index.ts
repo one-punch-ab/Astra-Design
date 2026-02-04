@@ -10,6 +10,8 @@ export { FixesOverlay } from './FixesOverlay';
 export { RecommendationsModal } from './RecommendationsModal';
 export { EfficiencyBanner } from './EfficiencyBanner';
 export { TestProgressBanner } from './TestProgressBanner';
+export { RecommendationsBanner } from './RecommendationsBanner';
+export { RecommendationsSummaryModal } from './RecommendationsSummaryModal';
 export { InstallAgentModal } from './InstallAgentModal';
 export { ManageColumnsDropdown, buildColumnsConfig, getDefaultColumnsConfig } from './ManageColumnsDropdown';
 export type { ColumnConfig } from './ManageColumnsDropdown';

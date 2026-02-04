@@ -1,7 +1,7 @@
 import React from 'react';
-import { Type, Sparkles, BarChart2, CheckCircle2, FileText } from 'lucide-react';
+import { Type, Sparkles, BarChart2, CheckCircle2, FileText, ChevronDown } from 'lucide-react';
 
-export type ColumnIconType = 'text' | 'ai' | 'metrics' | 'status' | 'notes';
+export type ColumnIconType = 'text' | 'ai' | 'metrics' | 'status' | 'notes' | 'dropdown';
 
 interface ColumnHeaderProps {
   displayName: string;
@@ -14,6 +14,7 @@ const iconMap: Record<ColumnIconType, React.ReactNode> = {
   metrics: <BarChart2 className="w-4 h-4" />,
   status: <CheckCircle2 className="w-4 h-4" />,
   notes: <FileText className="w-4 h-4" />,
+  dropdown: <ChevronDown className="w-4 h-4" />,
 };
 
 export const ColumnHeader: React.FC<ColumnHeaderProps> = ({
